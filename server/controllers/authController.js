@@ -1,9 +1,11 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
+import sendVerificationEmail from "../mailtrap/email.js";
 
 const signup = async (req, res) => {
   const { name, email, password } = req.body;
+
   try {
     if (!name || !email || !password) {
       throw new Error("All Fields are Required");
@@ -28,6 +30,8 @@ const signup = async (req, res) => {
     });
 
     generateToken(res, user._id);
+
+    await sendVerificationEmail(user.email, verificationToken);
 
     res.status(201).json({
       message: "User Created Successfully",
