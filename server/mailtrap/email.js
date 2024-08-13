@@ -22,4 +22,24 @@ const sendVerificationEmail = async (email, verificationToken) => {
   }
 };
 
-export default sendVerificationEmail;
+const sendWelcomeEmail = async (email, name) => {
+  const recipient = [{ email }];
+
+  try {
+    const response = await mailtrap.send({
+      from: sender,
+      to: recipient,
+      template_uuid: "7630bc72-e239-490a-9a24-780bd7d83905",
+      template_variables: {
+        company_info_name: "Auth System",
+        name: name,
+      },
+    });
+
+    return response;
+  } catch (error) {
+    throw new Error(`Error sending email: ${error}`);
+  }
+};
+
+export { sendVerificationEmail, sendWelcomeEmail };
