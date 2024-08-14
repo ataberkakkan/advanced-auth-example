@@ -177,4 +177,26 @@ const resetPassword = async (req, res) => {
   }
 };
 
-export { signup, login, logout, verifyEmail, forgotPassword, resetPassword };
+const checkAuth = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    res.status(200).json({ message: user });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export {
+  signup,
+  login,
+  logout,
+  verifyEmail,
+  forgotPassword,
+  resetPassword,
+  checkAuth,
+};
