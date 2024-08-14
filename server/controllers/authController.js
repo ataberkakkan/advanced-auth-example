@@ -5,6 +5,7 @@ import User from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
 import {
   sendForgotPasswordEmail,
+  sendResetSuccessEmail,
   sendVerificationEmail,
   sendWelcomeEmail,
 } from "../mailtrap/email.js";
@@ -144,4 +145,36 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-export { signup, login, logout, verifyEmail, forgotPassword };
+const resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordTokenExpiresAt: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      throw new Error("Invalid or expired request");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordTokenExpiresAt = undefined;
+
+    await user.save();
+
+    await sendResetSuccessEmail(user.email);
+
+    res
+      .status(200)
+      .json({ message: "Your password has been resetted successfully" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export { signup, login, logout, verifyEmail, forgotPassword, resetPassword };
