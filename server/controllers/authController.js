@@ -1,7 +1,13 @@
-import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+
+import User from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
-import { sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/email.js";
+import {
+  sendForgotPasswordEmail,
+  sendVerificationEmail,
+  sendWelcomeEmail,
+} from "../mailtrap/email.js";
 
 const signup = async (req, res) => {
   const { name, email, password } = req.body;
@@ -109,4 +115,33 @@ const verifyEmail = async (req, res) => {
   } catch (error) {}
 };
 
-export { signup, login, logout, verifyEmail };
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new Error("Email does not exist");
+    }
+
+    // Generate Reset Token
+    const resetToken = crypto.randomBytes(20).toString("hex");
+    const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000; // 1 hour
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordTokenExpiresAt = resetTokenExpiresAt;
+
+    await user.save();
+
+    await sendForgotPasswordEmail(
+      user.email,
+      `${process.env.CLIENT_URL}/reset-password/${resetToken}`
+    );
+
+    res.status(200).json({ message: "Check your inbox" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export { signup, login, logout, verifyEmail, forgotPassword };
