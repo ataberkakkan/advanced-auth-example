@@ -43,11 +43,43 @@ const signup = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  res.send("Log In");
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new Error("Invalid credentials");
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordCorrect) {
+      throw new Error("Invalid Credentials");
+    }
+
+    if (user && isPasswordCorrect) {
+      generateToken(res, user._id);
+
+      user.lastLogin = new Date();
+
+      await user.save();
+
+      res.status(200).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      });
+    }
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
 const logout = async (req, res) => {
-  res.send("Log out");
+  res.clearCookie("jwt");
+
+  res.status(200).json({ message: "Logged Out" });
 };
 
 const verifyEmail = async (req, res) => {
