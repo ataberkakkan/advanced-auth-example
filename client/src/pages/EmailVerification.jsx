@@ -1,11 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Loader } from "lucide-react";
+import { useAuthStore } from "../store/authStore";
+
+import toast from "react-hot-toast";
 
 const EmailVerification = () => {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const inputRef = useRef([]);
   const navigate = useNavigate();
+
+  const { verifyEmail, isLoading, error } = useAuthStore();
 
   const handleChange = (index, value) => {
     const newCode = [...code];
@@ -38,10 +44,18 @@ const EmailVerification = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const verificationCode = code.join("");
+    const verificationToken = code.join("");
+
+    try {
+      await verifyEmail(verificationToken);
+      navigate("/");
+      toast.success("Email Verified Successfully");
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
   };
 
   useEffect(() => {
@@ -90,7 +104,11 @@ const EmailVerification = () => {
             type="submit"
             disabled={code.some((digit) => !digit)}
           >
-            Submit
+            {isLoading ? (
+              <Loader className="animate-spin mx-auto" size={25} />
+            ) : (
+              "Submit"
+            )}
           </motion.button>
         </form>
       </div>

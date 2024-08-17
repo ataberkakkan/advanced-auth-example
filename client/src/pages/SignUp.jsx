@@ -1,7 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, Mail, User } from "lucide-react";
+import { Loader, Lock, Mail, User } from "lucide-react";
+import { useAuthStore } from "../store/authStore";
+
+import toast from "react-hot-toast";
 
 import Input from "../components/Input";
 import PasswordStrengthMeter from "../components/PasswordStrengthMeter";
@@ -11,8 +14,20 @@ const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSignUp = (e) => {
+  const navigate = useNavigate();
+
+  const { signup, error, isLoading } = useAuthStore();
+
+  const handleSignUp = async (e) => {
     e.preventDefault();
+
+    try {
+      await signup(name, email, password);
+
+      navigate("/verify-email");
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
   };
 
   return (
@@ -63,8 +78,13 @@ const SignUp = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
+            disabled={isLoading}
           >
-            Sign Up
+            {isLoading ? (
+              <Loader className="animate-spin mx-auto" size={25} />
+            ) : (
+              "Sign Up"
+            )}
           </motion.button>
         </form>
       </div>
