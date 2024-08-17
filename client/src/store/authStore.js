@@ -3,6 +3,8 @@ import axios from "axios";
 
 const BASE_URL = "http://localhost:8000/api/auth";
 
+axios.defaults.withCredentials = true;
+
 export const useAuthStore = create((set) => ({
   user: null,
   isAuthenticated: false,
@@ -33,6 +35,29 @@ export const useAuthStore = create((set) => ({
     }
   },
 
+  login: async (email, password) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const response = await axios.post(`${BASE_URL}/login`, {
+        email,
+        password,
+      });
+
+      set({
+        user: response.data.user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        error: error.response.data.message || "Error logging in",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
   verifyEmail: async (verificationToken) => {
     set({ isLoading: true, error: null });
 
@@ -52,6 +77,25 @@ export const useAuthStore = create((set) => ({
         isLoading: false,
       });
       throw error;
+    }
+  },
+
+  checkAuth: async () => {
+    set({ isCheckingAuth: true, error: null });
+
+    try {
+      const response = await axios.get(`${BASE_URL}/check-auth`);
+      set({
+        user: response.data.user,
+        isAuthenticated: true,
+        isCheckingAuth: false,
+      });
+    } catch (error) {
+      set({
+        error: null,
+        isCheckingAuth: false,
+        isAuthenticated: false,
+      });
     }
   },
 }));
