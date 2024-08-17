@@ -73,9 +73,7 @@ const login = async (req, res) => {
       await user.save();
 
       res.status(200).json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
+        user,
       });
     }
   } catch (error) {
@@ -185,7 +183,7 @@ const checkAuth = async (req, res) => {
       throw new Error("User not found");
     }
 
-    res.status(200).json({ message: user });
+    res.status(200).json({ user });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
