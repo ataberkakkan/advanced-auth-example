@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "advanced-auth-example": "file:..",
     "axios": "^1.7.4",
     "framer-motion": "^11.3.27",
     "lucide-react": "^0.427.0",
