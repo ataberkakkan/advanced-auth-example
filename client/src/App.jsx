@@ -2,12 +2,14 @@ import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuthStore } from "./store/authStore";
 
-import FloatingShape from "./components/FloatingShape";
 import Dashboard from "./pages/Dashboard";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
-import LoadingSpinner from "./components/LoadingSpinner";
 import EmailVerification from "./pages/EmailVerification";
+import ForgotPassword from "./pages/ForgotPassword";
+
+import FloatingShape from "./components/FloatingShape";
+import LoadingSpinner from "./components/LoadingSpinner";
 
 import { Toaster } from "react-hot-toast";
 
@@ -98,6 +100,14 @@ function App() {
           }
         />
         <Route path="/verify-email" element={<EmailVerification />} />
+        <Route
+          path="/forgot-password"
+          element={
+            <RedirectAuthenticatedUser>
+              <ForgotPassword />
+            </RedirectAuthenticatedUser>
+          }
+        />
       </Routes>
 
       <Toaster />
